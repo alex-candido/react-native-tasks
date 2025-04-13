@@ -1,0 +1,71 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id String @id @default(uuid()) @map("_id")
+
+  email                  String    @unique
+  encrypted_password     String
+  first_name             String
+  gender                 Int?
+  last_name              String
+  phone                  String?
+  remember_created_at    DateTime?
+  reset_password_sent_at DateTime?
+  reset_password_token   String?   @unique
+  role                   Int       @default(0)
+  social_media           Json?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Project {
+  id String @id @default(uuid()) @map("_id")
+
+  status Int?
+  title  String
+
+  taskGroups TaskGroup[]
+  tasks      Task[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model TaskGroup {
+  id String @id @default(uuid()) @map("_id")
+
+  position   Int?
+  status     Int    @default(0) // "active"
+  title      String
+  project_id String
+
+  project Project @relation(fields: [project_id], references: [id])
+  tasks   Task[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Task {
+  id String @id @default(uuid()) @map("_id")
+
+  description   String?
+  status        Int     @default(0) // "pending"
+  title         String
+  project_id    String
+  task_group_id String
+
+  project    Project   @relation(fields: [project_id], references: [id])
+  task_group TaskGroup @relation(fields: [task_group_id], references: [id])
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
